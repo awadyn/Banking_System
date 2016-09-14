@@ -1,0 +1,13 @@
+-----------------------------------------
+-	Simple Banking Application	-
+-----------------------------------------
+
+--------> run tests: python app_test.py
+	
+--------> available procedures:
+	- show users in system
+	- show transfers to user
+	- register user in system
+	- check user balance
+	- create transfer request
+	- handle incoming transfer request
