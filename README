@@ -1,5 +1,5 @@
 -----------------------------------------
--	###Simple Banking Application	-
+-	Simple Banking Application	-
 -----------------------------------------
 
 --------> run tests: python app_test.py
@@ -20,12 +20,14 @@ python db_create.py
 
 
 -----------------------------------------
-##Database Schema Versioning
+Database Schema Versioning
 -----------------------------------------
-#check if database schema has changed:
+---> check if database schema has changed:
 python db_migrate.py
-#upgrade if changed:
+
+---> upgrade if changed:
 python db_upgrade.py
-#downgrade if changed:
+
+---> downgrade if changed:
 python db_downgrade.py
 
