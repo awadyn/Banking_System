@@ -5,12 +5,11 @@ import json
 import os
 import string
 import random
+import datetime
 
-from app import app
+from app import app, db, models
 
 
-user_data = {'awadyn':['1234',100], 'yna03':['12345',100]}
-transfer_requests = {'id1':[222, 'awadyn', 'yna03', 50], 'id2':[333, 'awadyn', 'yna03', 20]}
 
 
 # generate random passwords
@@ -27,26 +26,27 @@ def transferid_generator(size=4, chars=string.ascii_lowercase + string.digits):
 
 # validate user
 def valid_user(userid, password):
-	for key in user_data:
-		if key == userid:
-			if user_data[userid][0] == password:
-				return True
-	return False
+	user = models.User.query.filter_by(userid=userid, password=password).first()
+	if user == None:
+		return False
+	else:
+		return True
 
 # validate transfer destination
 def valid_dest(userid):
-	for key in user_data:
-		if key == userid:
-			return True
-	return False
+	user = models.User.query.filter_by(userid=userid).first()
+	if user == None:
+		return False
+	else:
+		return True
 
 # validate transfer
 def valid_transfer(transferid, destid):
-	for key in transfer_requests:
-		if key == transferid:		
-			if transfer_requests[key][2] == destid:
-				return True
-	return False
+	transfer = models.Transfer.query.filter_by(transferid=transferid, destid=destid).first()
+	if transfer == None:
+		return False
+	else:
+		return True
 
 
 
@@ -55,7 +55,10 @@ def valid_transfer(transferid, destid):
 # show all users
 @app.route('/users/')
 def show_users():
-	return jsonify(user_data)
+	users = models.User.query.all()
+	print(users)
+	return "done\n"
+
 
 
 @app.route('/clear/')
@@ -74,13 +77,15 @@ def register():
 	if request.method == 'POST':
 		password = request.form['password']
 		if password == None:
-			return 'You may register here... Please enter a password...'
+			return "You may register here... Please enter a password...\n"
 		else:	
 			userid = userid_generator()
-			user_data[userid] = [password, 0]
-			return jsonify(user_data)
+			new_user = models.User(userid=userid, password=password, balance=0)
+			db.session.add(new_user)
+			db.session.commit()
+			return redirect(url_for('show_users'))
 	else:
-		return 'No POST Request'
+		return "No POST Request\n"
 
 
 
@@ -92,41 +97,41 @@ def balance():
 		userid = request.form['userid']
 		password = request.form['password']
 		if userid == None:
-			return 'Balance Page'
+			return "Balance Page\n"
 		elif password == None:
-			return 'Balance Page for ' + userid + '... Please enter password'
+			return "Balance Page for " + userid + "... Please enter password\n"
 		else:
 			if valid_user(userid, password):
-				return jsonify({'balance':user_data[userid][1]})
+				this_user = models.User.query.filter_by(userid=userid, password=password).first()
+				print(this_user.balance)
+				return "done\n"
 			else:
-				return 'Incorrect Userid or Password'
+				return "Incorrect Userid or Password\n"
 	else:
-		return 'No POST Request'
+		return "No POST Request\n"
 
 
 
 # view
-# list transfer requests by a user
+# list transfer requests to a user
 @app.route('/transfers', methods = ['GET', 'POST'])
 def transfers():
 	if request.method == 'POST':
 		userid = request.form['userid']
 		password = request.form['password']
 		if userid == None:
-			return 'Transfers Page'
+			return "Transfers Page\n"
 		elif password == None:
-			return 'Transfers Page for ' + userid + '... Please enter password'
+			return "Transfers Page for " + userid + "... Please enter password\n"
 		else:
-			transfers = []
 			if valid_user(userid, password):
-				for key in transfer_requests:
-					if transfer_requests[key][2] == userid:
-						transfers.append(transfer_requests[key])	
-				return jsonify({'transfer_requests':transfers})
+				transfers = models.Transfer.query.filter_by(destid=userid).all()
+				print(transfers)
+				return "done\n"
 			else:
-				return 'Incorrect Userid or Password'
+				return "Incorrect Userid or Password\n"
 	else:
-		return 'No POST Request'
+		return "No POST Request\n"
 
 
 
@@ -140,29 +145,33 @@ def create_transfer(sourceid=None, password=None, destid=None, amount=None):
 		destid = request.form['destid']
 		amount = request.form['amount']
 		if sourceid == None:
-			return 'Create Transfer Here'
+			return "Create Transfer Here\n"
 		elif password == None:
-			return sourceid + ', you may create a transfer here... Please enter your password'
+			return sourceid + ", you may create a transfer here... Please enter your password\n"
 		elif destid == None:
-			return sourceid + ', you may create a transfer here... Please enter the destination of this transfer'
+			return sourceid + ", you may create a transfer here... Please enter the destination of this transfer\n"
 		elif amount == None:
-			return sourceid + ', you may create a transfer here... Please enter the amount to transfer'
+			return sourceid + ", you may create a transfer here... Please enter the amount to transfer\n"
 		else:
 			transferid = None
 			if valid_user(sourceid, password):
 				if valid_dest(destid):
-					if user_data[sourceid][1] >= int(amount):
+					user_balance = models.User.query.filter_by(userid=sourceid, password=password).first().balance
+					if user_balance >= int(amount):
 						transferid = transferid_generator()
-						transfer_requests[transferid] = [444, sourceid, destid, int(amount)]
-						return transferid
+						transfer = models.Transfer(transferid=transferid, date=datetime.date.today(), sourceid=sourceid, destid=destid, amount=amount)
+						db.session.add(transfer)
+						db.session.commit()
+						print(transfer)
+						return "done\n"
 					else:
-						return 'Insufficient Balance'
+						return "Insufficient Balance\n"
 				else:
-					return 'Invalid Transfer Destination'
+					return "Invalid Transfer Destination\n"
 			else:
-				return 'Incorrect Userid or Password'
+				return "Incorrect Userid or Password\n"
 	else:
-		return 'No POST Request'
+		return "No POST Request\n"
 
 
 
@@ -176,29 +185,33 @@ def handle_incoming_request():
 		transferid = request.form['transferid']
 		approve = request.form['approve']
 		if userid == None:
-			return 'Handle Requests Here'
+			return "Handle Requests Here\n"
 		elif password == None:
-			return 'Handle Requests to ' + userid + '... Please enter password'
+			return "Handle Requests to " + userid + "... Please enter password\n"
 		elif transferid == None:
-			return 'Handle Requests to ' + userid + '... Please enter transferid'
+			return "Handle Requests to " + userid + "... Please enter transferid\n"
 		elif approve == None:
-			return 'Handle Transfer Request ' + transferid + ' to ' + userid + '... Approve?'
+			return "Handle Transfer Request " + transferid + " to " + userid + "... Approve?\n"
 		else:
 			if valid_user(userid, password):
 				if valid_transfer(transferid, userid):
 					if int(approve) == 1:
-						user_data[transfer_requests[transferid][1]][1] -= transfer_requests[transferid][3]
-						user_data[userid][1] += transfer_requests[transferid][3]
-						del transfer_requests[transferid]
-						return 'Transfer Handled'
+						dest_user = models.User.query.filter_by(userid=userid).first()
+						transfer = models.Transfer.query.filter_by(transferid=transferid).first()
+						source_user = models.User.query.filter_by(userid=transfer.sourceid).first()
+						dest_user.balance += transfer.amount
+						source_user.balance -= transfer.amount
+						db.session.delete(transfer)
+						db.session.commit()
+						return "Transfer Handled\n"
 					else:
-						return 'Transfer ' + transferid + ' Not Approved'
+						return "Transfer " + transferid + " Not Approved\n"
 				else:
-					return 'Invalid Transfer'
+					return "Invalid Transfer\n"
 			else:
-				return 'Incorrect Username or Password'
+				return "Incorrect Username or Password\n"
 	else:
-		return 'No POST Request'
+		return "No POST Request\n"
 
 
 
