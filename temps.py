@@ -1,28 +1,3 @@
-from app import app
-
-import os
-import json
-import unittest
-import tempfile
-
-class FlaskTestCase(unittest.TestCase):
-
-	
-#	def test_clear(self):
-#		tester = app.test_client(self)
-#		response = tester.get('/clear/', content_type = 'application/json')
-#		self.assertEqual(response.status_code, 200)
-#		print('Unittest: /clear/: ' + response.data)
-
-
-
-	def test_users(self):
-		tester = app.test_client(self)
-		response = tester.get('/users/', content_type = 'application/json')
-		self.assertEqual(response.status_code, 200)
-		print('Unittest: /show_users/: ' + response.data)
-
-
 	def handle_incoming_request(self, userid=None, password=None, transferid=None, approve=None):
 		tester = app.test_client(self)
 		return tester.post('/handle_incoming_request', data=dict(userid=userid, password=password, transferid=transferid, approve=approve))
@@ -73,26 +48,4 @@ class FlaskTestCase(unittest.TestCase):
 
 	def register(self, password=None):
 		tester = app.test_client(self)
-		return tester.post('/register', data=dict(password=password), follow_redirects=True)			
-	def test_register(self):
-		response_2 = self.register('11111')
-		self.assertEqual(response_2.status_code, 200)
-		print('Unittest: /register, {password=11111}: ' + response_2.data)
 
-
-	def balance(self, userid=None, password=None):
-		tester = app.test_client(self)
-		return tester.post('/balance', data=dict(userid=userid, password=password), follow_redirects=True)
-	def test_balance(self):
-		response_3 = self.balance('yna03', '1234')
-		self.assertEqual(response_3.status_code, 200)
-		print('Unittest: /balance, {userid=yna03, password=1234}: ' + response_3.data)
-		response_4 = self.balance('yna03', '12345')
-		self.assertEqual(response_4.status_code, 200)
-		print('Unittest: /balance, {userid=yna03, password=12345}: ' + response_4.data)
-
-
-
-
-if __name__ == '__main__':
-	unittest.main()

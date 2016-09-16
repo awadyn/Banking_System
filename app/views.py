@@ -6,23 +6,36 @@ import os
 import string
 import random
 import datetime
+import uuid
+
 
 from app import app, db, models
 
 
+# compress UUID
+# UUID to more compact form (string of 22 characters)
+def uuid2compact(uuid):
+	return uuid.bytes.encode('base64'.rstrip('=\n').replace('/','_'))
 
+# decompress UUID
+# from string of 22 characters to UUID
+def compact2uuid(uuid_compact):
+	return str(uuid.UUID(bytes=(uuid_compact + '==').replace('_','/').decode('base64')))
 
-# generate random passwords
-def pass_generator(size=4, chars=string.ascii_uppercase + string.ascii_lowercase + string.digits):
-	return ''.join(random.choice(chars) for _ in range(size))
+# generate unique userid's using python's uuid module
+# uuid4(): generates unique uuid from random number
+# returns unique userid as str
+def userid_generator():
+	return str(uuid.uuid4())
+#	return uuid2compact(uuid.uuid4())
 
-# generate random user_id
-def userid_generator(size=6, chars=string.ascii_lowercase + string.digits):
-	return ''.join(random.choice(chars) for _ in range(size))
+# generate unique transferid's using python's uuid module
+# uuid4(): generates unique uuid from random number
+# returns unique userid as str
+def transferid_generator():
+	return str(uuid.uuid4())
+	return uuid2compact(uuid.uuid4())
 
-# generate random transfer_id
-def transferid_generator(size=4, chars=string.ascii_lowercase + string.digits):
-	return ''.join(random.choice(chars) for _ in range(size))
 
 # validate user
 def valid_user(userid, password):
@@ -80,7 +93,7 @@ def register():
 			return "You may register here... Please enter a password...\n"
 		else:	
 			userid = userid_generator()
-			new_user = models.User(userid=userid, password=password, balance=0)
+			new_user = models.User(userid=userid, password=password, balance=0, temp_balance=0)
 			db.session.add(new_user)
 			db.session.commit()
 			return redirect(url_for('show_users'))
@@ -157,13 +170,18 @@ def create_transfer(sourceid=None, password=None, destid=None, amount=None):
 			if valid_user(sourceid, password):
 				if valid_dest(destid):
 					user_balance = models.User.query.filter_by(userid=sourceid, password=password).first().balance
+					user_temp_balance = models.User.query.filter_by(userid=sourceid, password=password).first().temp_balance
 					if user_balance >= int(amount):
-						transferid = transferid_generator()
-						transfer = models.Transfer(transferid=transferid, date=datetime.date.today(), sourceid=sourceid, destid=destid, amount=amount)
-						db.session.add(transfer)
-						db.session.commit()
-						print(transfer)
-						return "done\n"
+						if user_temp_balance >= int(amount):
+							transferid = transferid_generator()
+							transfer = models.Transfer(transferid=transferid, date=datetime.date.today(), sourceid=sourceid, destid=destid, amount=amount)
+							models.User.query.filter_by(userid=sourceid, password=password).first().temp_balance -= int(amount)
+							db.session.add(transfer)
+							db.session.commit()
+							print(transfer)
+							return "done\n"
+						else:
+							return "Cannot make this transfer... Try handling incoming requests first\n"
 					else:
 						return "Insufficient Balance\n"
 				else:
@@ -200,6 +218,7 @@ def handle_incoming_request():
 						transfer = models.Transfer.query.filter_by(transferid=transferid).first()
 						source_user = models.User.query.filter_by(userid=transfer.sourceid).first()
 						dest_user.balance += transfer.amount
+						dest_user.temp_balance += transfer.amount
 						source_user.balance -= transfer.amount
 						db.session.delete(transfer)
 						db.session.commit()
