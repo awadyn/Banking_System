@@ -1,4 +1,4 @@
-from flask import Flask, request, session, g, redirect, url_for, abort, flash
+from flask import Flask, request, session, g, redirect, url_for, abort, flash, render_template
 from flask.json import jsonify
 import requests
 import json
@@ -10,6 +10,7 @@ import uuid
 
 
 from app import app, db, models
+from .forms import RegisterForm, BalanceForm, TransfersForm, CreateTransferForm, HandleIncomingRequestForm
 
 
 # compress UUID
@@ -65,21 +66,10 @@ def valid_transfer(transferid, destid):
 
 
 # view
-# show all users
-@app.route('/users/')
-def show_users():
-	users = models.User.query.all()
-	print(users)
-	return "done\n"
-
-
-
-@app.route('/clear/')
-def clear():
-	user_data.clear()
-	transfer_requests.clear()
-	return jsonify(user_data)
-
+# index page (temporary)
+@app.route('/index')
+def index():
+	return render_template('index.html', title='Home')
 
 
 
@@ -87,18 +77,17 @@ def clear():
 # register new user
 @app.route('/register', methods = ['GET', 'POST'])
 def register():
-	if request.method == 'POST':
-		password = request.form['password']
-		if password == None:
-			return "You may register here... Please enter a password...\n"
-		else:	
-			userid = userid_generator()
-			new_user = models.User(userid=userid, password=password, balance=0, temp_balance=0)
-			db.session.add(new_user)
-			db.session.commit()
-			return redirect(url_for('show_users'))
+	form = RegisterForm()
+	if request.method == 'POST' and form.validate_on_submit():
+		userid = userid_generator()
+		new_user = models.User(userid=userid, password=form.password.data, balance=form.balance.data, temp_balance=form.balance.data)
+		db.session.add(new_user)
+		db.session.commit()
+		# for debugging
+		flash('Registration Validated for User = "%s", Password = "%s", Balance = %d' % (userid, form.password.data, form.balance.data))
+		return redirect('/index')
 	else:
-		return "No POST Request\n"
+		return render_template('register.html', title='Register', form=form)
 
 
 
@@ -106,22 +95,21 @@ def register():
 # check balance
 @app.route('/balance', methods=['GET', 'POST'])
 def balance():
-	if request.method == 'POST':
-		userid = request.form['userid']
-		password = request.form['password']
-		if userid == None:
-			return "Balance Page\n"
-		elif password == None:
-			return "Balance Page for " + userid + "... Please enter password\n"
+	form = BalanceForm()
+	if request.method == 'POST' and form.validate_on_submit():
+		userid = form.userid.data
+		password = form.password.data
+		if valid_user(userid, password):
+			this_user = models.User.query.filter_by(userid=userid, password=password).first()
+			balance = this_user.balance
+			# for debugging
+			flash('Balance Check Validated for User = "%s", Password = "%s": Balance = %d' % (userid, password, balance))
+			return redirect('/index')
 		else:
-			if valid_user(userid, password):
-				this_user = models.User.query.filter_by(userid=userid, password=password).first()
-				print(this_user.balance)
-				return "done\n"
-			else:
-				return "Incorrect Userid or Password\n"
+			flash('Incorrect UserID or Password', 'error')
+			return render_template('balance.html', title='Balance', form=form)
 	else:
-		return "No POST Request\n"
+		return render_template('balance.html', title='Balance', form=form)
 
 
 
@@ -129,22 +117,20 @@ def balance():
 # list transfer requests to a user
 @app.route('/transfers', methods = ['GET', 'POST'])
 def transfers():
-	if request.method == 'POST':
-		userid = request.form['userid']
-		password = request.form['password']
-		if userid == None:
-			return "Transfers Page\n"
-		elif password == None:
-			return "Transfers Page for " + userid + "... Please enter password\n"
+	form = TransfersForm()
+	if request.method == 'POST' and form.validate_on_submit():
+		userid = form.userid.data
+		password = form.password.data
+		if valid_user(userid, password):
+			transfers = models.Transfer.query.filter_by(destid=userid).all()
+			# for debugging
+			flash('Check Transfers Validated for User = "%s", Password = "%s": Transfers = %s' % (userid, password, str(transfers)))
+			return redirect('/index')
 		else:
-			if valid_user(userid, password):
-				transfers = models.Transfer.query.filter_by(destid=userid).all()
-				print(transfers)
-				return "done\n"
-			else:
-				return "Incorrect Userid or Password\n"
+			flash('Incorrect UserID or Password', 'error')
+			return render_template('transfers.html', title='Transfers', form=form)
 	else:
-		return "No POST Request\n"
+		return render_template('transfers.html', title='Transfers', form=form)
 
 
 
@@ -152,44 +138,40 @@ def transfers():
 # create a transfer request
 @app.route('/create_transfer', methods=['GET', 'POST'])
 def create_transfer(sourceid=None, password=None, destid=None, amount=None):
-	if request.method == 'POST':
-		sourceid = request.form['sourceid']
-		password = request.form['password']
-		destid = request.form['destid']
-		amount = request.form['amount']
-		if sourceid == None:
-			return "Create Transfer Here\n"
-		elif password == None:
-			return sourceid + ", you may create a transfer here... Please enter your password\n"
-		elif destid == None:
-			return sourceid + ", you may create a transfer here... Please enter the destination of this transfer\n"
-		elif amount == None:
-			return sourceid + ", you may create a transfer here... Please enter the amount to transfer\n"
-		else:
-			transferid = None
-			if valid_user(sourceid, password):
-				if valid_dest(destid):
-					user_balance = models.User.query.filter_by(userid=sourceid, password=password).first().balance
-					user_temp_balance = models.User.query.filter_by(userid=sourceid, password=password).first().temp_balance
-					if user_balance >= int(amount):
-						if user_temp_balance >= int(amount):
-							transferid = transferid_generator()
-							transfer = models.Transfer(transferid=transferid, date=datetime.date.today(), sourceid=sourceid, destid=destid, amount=amount)
-							models.User.query.filter_by(userid=sourceid, password=password).first().temp_balance -= int(amount)
-							db.session.add(transfer)
-							db.session.commit()
-							print(transfer)
-							return "done\n"
-						else:
-							return "Cannot make this transfer... Try handling incoming requests first\n"
+	form = CreateTransferForm()
+	if request.method == 'POST' and form.validate_on_submit():
+		sourceid = form.sourceid.data
+		password = form.password.data
+		destid = form.destid.data
+		amount = form.amount.data
+		if valid_user(sourceid, password):
+			if valid_dest(destid):
+				user_balance = models.User.query.filter_by(userid=sourceid, password=password).first().balance
+				user_temp_balance = models.User.query.filter_by(userid=sourceid, password=password).first().temp_balance
+				if user_balance >= int(amount):
+					if user_temp_balance >= int(amount):
+						transferid = transferid_generator()
+						transfer = models.Transfer(transferid=transferid, date=datetime.date.today(), sourceid=sourceid, destid=destid, amount=amount)
+						models.User.query.filter_by(userid=sourceid, password=password).first().temp_balance -= int(amount)
+						db.session.add(transfer)
+						db.session.commit()
+						# for debugging
+						flash('Create Transfer Validated for User = "%s", Password = "%s", Destination = "%s", Amount= %d: TransferID = "%s"' % (sourceid, password, destid, amount, transferid))
+						return redirect('/index')
 					else:
-						return "Insufficient Balance\n"
+						flash('Cannot make this transfer... Try handling incoming requests first', 'error')
+						return render_template('create_transfer.html', title='Create Transfer', form=form)
 				else:
-					return "Invalid Transfer Destination\n"
+					flash('Cannot make this transfer... Insufficient Balance', 'error')
+					return render_template('create_transfer.html', title='Create Transfer', form=form)
 			else:
-				return "Incorrect Userid or Password\n"
+				flash('Invalid Transfer Destination', 'error')
+				return render_template('create_transfer.html', title='Create Transfer', form=form)
+		else:
+			flash('Incorrect Userid or Password', 'error')				
+			return render_template('create_transfer.html', title='Create Transfer', form=form)
 	else:
-		return "No POST Request\n"
+		return render_template('create_transfer.html', title='Create Transfer', form=form)
 
 
 
@@ -197,40 +179,37 @@ def create_transfer(sourceid=None, password=None, destid=None, amount=None):
 # handle incoming request
 @app.route('/handle_incoming_request', methods=['GET', 'POST'])
 def handle_incoming_request():
-	if request.method == 'POST':
-		userid = request.form['userid']
-		password = request.form['password']
-		transferid = request.form['transferid']
-		approve = request.form['approve']
-		if userid == None:
-			return "Handle Requests Here\n"
-		elif password == None:
-			return "Handle Requests to " + userid + "... Please enter password\n"
-		elif transferid == None:
-			return "Handle Requests to " + userid + "... Please enter transferid\n"
-		elif approve == None:
-			return "Handle Transfer Request " + transferid + " to " + userid + "... Approve?\n"
-		else:
-			if valid_user(userid, password):
-				if valid_transfer(transferid, userid):
-					if int(approve) == 1:
-						dest_user = models.User.query.filter_by(userid=userid).first()
-						transfer = models.Transfer.query.filter_by(transferid=transferid).first()
-						source_user = models.User.query.filter_by(userid=transfer.sourceid).first()
-						dest_user.balance += transfer.amount
-						dest_user.temp_balance += transfer.amount
-						source_user.balance -= transfer.amount
-						db.session.delete(transfer)
-						db.session.commit()
-						return "Transfer Handled\n"
-					else:
-						return "Transfer " + transferid + " Not Approved\n"
+	form = HandleIncomingRequestForm()
+	if request.method == 'POST' and form.validate_on_submit():
+		userid = form.userid.data
+		password = form.password.data
+		transferid = form.transferid.data
+		approve = form.approve.data
+		if valid_user(userid, password):
+			if valid_transfer(transferid, userid):
+				if int(approve) == 1:
+					dest_user = models.User.query.filter_by(userid=userid).first()
+					transfer = models.Transfer.query.filter_by(transferid=transferid).first()
+					source_user = models.User.query.filter_by(userid=transfer.sourceid).first()
+					dest_user.balance += transfer.amount
+					dest_user.temp_balance += transfer.amount
+					source_user.balance -= transfer.amount
+					db.session.delete(transfer)
+					db.session.commit()
+					# for debugging
+					flash('Handle Transfer Validated for User = "%s", Password = "%s", Transfer = "%s", Approve= %d: New Balance = %d' % (userid, password, transferid, int(approve), dest_user.balance))
+					return redirect('/index')
 				else:
-					return "Invalid Transfer\n"
+					flash('Transfer Not Approved', 'error')
+					return render_template('handle_incoming_request.html', title='Handle Incoming Request', form=form)
 			else:
-				return "Incorrect Username or Password\n"
+				flash('Invalid Transfer', 'error')
+				return render_template('handle_incoming_request.html', title='Handle Incoming Request', form=form)
+		else:
+			flash('Incorrect Username or Password', 'error')
+			return render_template('handle_incoming_request.html', title='Handle Incoming Request', form=form)
 	else:
-		return "No POST Request\n"
+		return render_template('handle_incoming_request.html', title='Handle Incoming Request', form=form)
 
 
 

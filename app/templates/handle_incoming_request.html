@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1> Handle Incoming Transfer Request </h1>
+	<form action="" method="post" name="handle_incoming_request">
+		{{ form.hidden_tag() }}
+		<p> UserID:<br>
+			{{ form.userid(size=32) }}<br>
+			{% for error in form.userid.errors %}
+				<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}<br>
+		</p>
+		<p> Password:<br>
+			{{ form.password(size=16) }}<br>
+			{% for error in form.password.errors %}
+				<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}<br>
+		</p>
+		<p> TransferID:<br>
+			{{ form.transferid(size=32) }}<br> 
+			{% for error in form.transferid.errors %}
+				<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}<br>
+		</p>
+		<p> Approve Transfer:<br>
+			{{ form.approve }}<br>
+			{% for error in form.approve.errors %}
+				<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}<br>
+		</p>
+		<p><input type="submit" value="Handle Transfer"></p>
+	</form>
+{% endblock %}
+
+

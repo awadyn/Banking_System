@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1> Incoming Transfers </h1>
+	<form action="" method="post" name="transfers">
+		{{ form.hidden_tag() }}
+		<p> UserID:<br>
+			{{ form.userid(size=32) }}<br>
+			{% for error in form.userid.errors %}
+				<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}<br>
+		</p>
+		<p> Password:<br>
+			{{ form.password(size=16) }}<br>
+			{% for error in form.password.errors %}
+				<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}<br>
+		</p>
+		<p><input type="submit" value="Check Transfers"></p>
+	</form>
+{% endblock %}
+

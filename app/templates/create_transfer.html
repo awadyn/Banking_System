@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1> Create a Transfer </h1>
+	<form action="" method="post" name="create_transfer">
+		{{ form.hidden_tag() }}
+		<p> UserID:<br>
+			{{ form.sourceid(size=32) }}<br>
+			{% for error in form.sourceid.errors %}
+				<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}<br>
+		</p>
+		<p> Password:<br>
+			{{ form.password(size=16) }}<br>
+			{% for error in form.password.errors %}
+				<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}<br>
+		</p>
+		<p> Destination of Transfer:<br>
+			{{ form.destid(size=32) }}<br> 
+			{% for error in form.destid.errors %}
+				<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}<br>
+		</p>
+		<p> Amount to Transfer:<br>
+			{{ form.amount }}<br>
+			{% for error in form.amount.errors %}
+				<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}<br>
+		</p>
+		<p><input type="submit" value="Create Transfer"></p>
+	</form>
+{% endblock %}
+
