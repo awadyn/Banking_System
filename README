@@ -2,32 +2,13 @@
 -	Simple Banking Application	-
 -----------------------------------------
 
---------> run tests: python app_test.py
+--------> run tests: python app_client_test.py
 	
 --------> available procedures:
-	- show users in system
-	- show transfers to user
+	- show transfers made to user
 	- register user in system
 	- check user balance
 	- create transfer request
 	- handle incoming transfer request
 
-
------------------------------------------
-Create Database
------------------------------------------
-python db_create.py
-
-
------------------------------------------
-Database Schema Versioning
------------------------------------------
----> check if database schema has changed:
-python db_migrate.py
-
----> upgrade if changed:
-python db_upgrade.py
-
----> downgrade if changed:
-python db_downgrade.py
 
