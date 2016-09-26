@@ -1,0 +1,28 @@
+-----------------------------------------
+-	Simple Banking Application	-
+-----------------------------------------
+
+--------> run tests: python app_client_test.py
+	
+--------> available procedures:
+	- show transfers made to user
+	- register user in system
+	- check user balance
+	- create transfer request
+	- handle incoming transfer request
+
+
+Database Migrations
+
+Initialize Alembic:
+alembic init alembic
+
+Generate New Revision:
+alembic revision -m "revision message"
+
+Upgrade/Downgrade Database:
+alembic upgrade <revision>
+alembic downgrade <revision>
+
+Check Database Revision Status:
+alembic current

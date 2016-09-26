@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+	<h1> Register </h1>
+	<form action="" method="post" name="register">
+		{{ form.hidden_tag() }}
+		<p> Password:<br>
+			{{ form.password(size=16) }}<br>
+			{% for error in form.password.errors %}
+				<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}<br>
+		</p>
+		<p> Confirm Password:<br>
+			{{ form.confirm_password(size=16) }}<br>
+			{% for error in form.confirm_password.errors %}
+				<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}<br>
+
+		</p>
+		<p> Balance:<br>
+			{{ form.balance }}<br>
+			{% for error in form.balance.errors %}
+				<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}<br>
+
+		</p>
+		<p><input type="submit" value="Register"></p>
+	</form>
+{% endblock %}
+
