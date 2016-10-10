@@ -19,7 +19,6 @@ def valid_amount(min=0, max=-1):
 class RegisterForm(Form):
 	password = PasswordField('password', validators = [InputRequired(), EqualTo('confirm_password', message='Passwords Must Match'), Length(min=8, max=16, message='Password length must be between 8 and 16 characters long.')])
 	confirm_password = PasswordField('confirm_password', validators = [InputRequired()])
-	balance = IntegerField('balance', validators = [InputRequired(), valid_amount(max=sys.maxint)], default=0)
 
 
 class BalanceForm(Form):
@@ -36,8 +35,8 @@ class CreateTransferForm(Form):
 	sourceid = StringField('sourceid', validators = [InputRequired(), UUID(message='Invalid UUID')], default='User ID')
 	password = PasswordField('password', validators = [InputRequired(), Length(min=8, max=16, message='Password length must be between 8 and 16 characters long.')])
 	destid = StringField('destid', validators = [InputRequired(), UUID(message='Invalid UUID')], default='Destination ID')
-	amount = IntegerField('amount', validators = [InputRequired(), valid_amount(max=sys.maxint)], default=0)
-
+	amount = IntegerField('amount', validators = [InputRequired(), valid_amount(max=sys.maxint)], default=None)
+	message = StringField('message', validators = [Length(max=30)], default='transfer message')
 
 class HandleIncomingRequestForm(Form):
 	userid = StringField('userid', validators = [InputRequired(), UUID(message='Invalid UUID')], default='User ID')

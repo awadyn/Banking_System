@@ -13,7 +13,7 @@ class User(db.Model):
 		self.balance = balance
 	
 	def __repr__(self):
-		return '<User %s>' % (self.userid)
+		return '<User: %s>' % (self.userid)
 
 
 class Transfer(db.Model):
@@ -38,4 +38,4 @@ class Transfer(db.Model):
 		self.message = message
 
 	def __repr__(self):
-		return '<Transfer %r>' % (self.transferid)
+		return '<Transfer: %s, Transfer Message: %s>' % (self.transferid, self.message)

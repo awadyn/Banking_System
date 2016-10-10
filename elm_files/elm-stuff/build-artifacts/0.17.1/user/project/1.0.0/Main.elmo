@@ -1,0 +1,375 @@
+var _user$project$Main$valid_inputs = function (model) {
+	return _elm_lang$core$Basics$not(
+		_elm_lang$core$Native_Utils.eq(model.password, '') || (_elm_lang$core$Native_Utils.eq(model.userid, '') || _elm_lang$core$Native_Utils.eq(model.transferid, '')));
+};
+var _user$project$Main$validate_transferid = function (model) {
+	var transferid_state = _elm_lang$core$Native_Utils.eq(model.transferid, '') ? 'TransferID Required' : '';
+	return _elm_lang$html$Html$text(transferid_state);
+};
+var _user$project$Main$validate_userid = function (model) {
+	var userid_state = _elm_lang$core$Native_Utils.eq(model.userid, '') ? 'UserID Required' : '';
+	return _elm_lang$html$Html$text(userid_state);
+};
+var _user$project$Main$validate_password = function (model) {
+	var password_state = _elm_lang$core$Native_Utils.eq(model.password, '') ? 'Password Required' : '';
+	return _elm_lang$html$Html$text(password_state);
+};
+var _user$project$Main$subscriptions = function (model) {
+	return _elm_lang$core$Platform_Sub$none;
+};
+var _user$project$Main$handleRequestDecoder = A4(
+	_elm_lang$core$Json_Decode$object3,
+	F3(
+		function (v0, v1, v2) {
+			return {ctor: '_Tuple3', _0: v0, _1: v1, _2: v2};
+		}),
+	A2(_elm_lang$core$Json_Decode_ops[':='], 'Request Status', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode_ops[':='], 'Current Balance', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode_ops[':='], 'Error', _elm_lang$core$Json_Decode$string));
+var _user$project$Main$handleRequestEncoder = function (model) {
+	return _elm_lang$core$Json_Encode$object(
+		_elm_lang$core$Native_List.fromArray(
+			[
+				{
+				ctor: '_Tuple2',
+				_0: 'userid',
+				_1: _elm_lang$core$Json_Encode$string(model.userid)
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'password',
+				_1: _elm_lang$core$Json_Encode$string(model.password)
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'transferid',
+				_1: _elm_lang$core$Json_Encode$string(model.transferid)
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'approve',
+				_1: _elm_lang$core$Json_Encode$bool(model.approve)
+			}
+			]));
+};
+var _user$project$Main$handleRequest = F2(
+	function (model, api_url) {
+		return A2(
+			_evancz$elm_http$Http$fromJson,
+			_user$project$Main$handleRequestDecoder,
+			A2(
+				_evancz$elm_http$Http$send,
+				_evancz$elm_http$Http$defaultSettings,
+				{
+					verb: 'POST',
+					headers: _elm_lang$core$Native_List.fromArray(
+						[
+							{ctor: '_Tuple2', _0: 'Content-Type', _1: 'application/json'}
+						]),
+					url: api_url,
+					body: _evancz$elm_http$Http$string(
+						A2(
+							_elm_lang$core$Json_Encode$encode,
+							0,
+							_user$project$Main$handleRequestEncoder(model)))
+				}));
+	});
+var _user$project$Main$handle_incoming_request_url = 'http://localhost:5000/handle_incoming_request';
+var _user$project$Main$Model = F5(
+	function (a, b, c, d, e) {
+		return {userid: a, password: b, transferid: c, approve: d, message: e};
+	});
+var _user$project$Main$init = {
+	ctor: '_Tuple2',
+	_0: A5(_user$project$Main$Model, '', '', '', false, ''),
+	_1: _elm_lang$core$Platform_Cmd$none
+};
+var _user$project$Main$SetInputState = {ctor: 'SetInputState'};
+var _user$project$Main$SubmitSuccess = function (a) {
+	return {ctor: 'SubmitSuccess', _0: a};
+};
+var _user$project$Main$SubmitFail = function (a) {
+	return {ctor: 'SubmitFail', _0: a};
+};
+var _user$project$Main$submitCmd = F2(
+	function (model, api_url) {
+		return A3(
+			_elm_lang$core$Task$perform,
+			_user$project$Main$SubmitFail,
+			_user$project$Main$SubmitSuccess,
+			A2(_user$project$Main$handleRequest, model, api_url));
+	});
+var _user$project$Main$update = F2(
+	function (msg, model) {
+		var _p0 = msg;
+		switch (_p0.ctor) {
+			case 'SetUserId':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{userid: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SetPassword':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{password: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SetTransferId':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{transferid: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SetApprove':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							approve: _elm_lang$core$Basics$not(model.approve)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SubmitForm':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A2(_user$project$Main$submitCmd, model, _user$project$Main$handle_incoming_request_url)
+				};
+			case 'SubmitFail':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							password: '',
+							message: _elm_lang$core$Basics$toString(_p0._0)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SubmitSuccess':
+				var _p2 = _p0._0._2;
+				var _p1 = _p2;
+				if (_p1 === '') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								password: '',
+								message: A2(
+									_elm_lang$core$Basics_ops['++'],
+									_p0._0._0,
+									A2(_elm_lang$core$Basics_ops['++'], ', Current Balance: ', _p0._0._1))
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{password: '', message: _p2}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{password: '', message: 'Check Required Fields'}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+		}
+	});
+var _user$project$Main$SubmitForm = {ctor: 'SubmitForm'};
+var _user$project$Main$SetApprove = function (a) {
+	return {ctor: 'SetApprove', _0: a};
+};
+var _user$project$Main$SetTransferId = function (a) {
+	return {ctor: 'SetTransferId', _0: a};
+};
+var _user$project$Main$SetPassword = function (a) {
+	return {ctor: 'SetPassword', _0: a};
+};
+var _user$project$Main$SetUserId = function (a) {
+	return {ctor: 'SetUserId', _0: a};
+};
+var _user$project$Main$view = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(
+				_elm_lang$html$Html$h2,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('Gooble Gobble')
+					])),
+				A2(
+				_elm_lang$html$Html$h3,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('Handle Incoming Transfer Request')
+					])),
+				A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						A2(
+						_elm_lang$html$Html$label,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$for('userid_field')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('User Id ')
+							])),
+						A2(
+						_elm_lang$html$Html$input,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$id('userid_field'),
+								_elm_lang$html$Html_Attributes$type$('string'),
+								_elm_lang$html$Html_Attributes$placeholder('Enter UserID'),
+								_elm_lang$html$Html_Attributes$required(true),
+								_elm_lang$html$Html_Events$onInput(_user$project$Main$SetUserId)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						_user$project$Main$validate_userid(model),
+						A2(
+						_elm_lang$html$Html$br,
+						_elm_lang$core$Native_List.fromArray(
+							[]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						A2(
+						_elm_lang$html$Html$label,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$for('password_field')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('Password ')
+							])),
+						A2(
+						_elm_lang$html$Html$input,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$id('password_field'),
+								_elm_lang$html$Html_Attributes$type$('password'),
+								_elm_lang$html$Html_Attributes$placeholder('Enter Password'),
+								_elm_lang$html$Html_Attributes$required(true),
+								_elm_lang$html$Html_Attributes$value(model.password),
+								_elm_lang$html$Html_Events$onInput(_user$project$Main$SetPassword)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						_user$project$Main$validate_password(model),
+						A2(
+						_elm_lang$html$Html$br,
+						_elm_lang$core$Native_List.fromArray(
+							[]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						A2(
+						_elm_lang$html$Html$label,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$for('transferid_field')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('Transfer Id ')
+							])),
+						A2(
+						_elm_lang$html$Html$input,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$id('transferid_field'),
+								_elm_lang$html$Html_Attributes$type$('string'),
+								_elm_lang$html$Html_Attributes$placeholder('Enter TransferID'),
+								_elm_lang$html$Html_Attributes$required(true),
+								_elm_lang$html$Html_Events$onInput(_user$project$Main$SetTransferId)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						_user$project$Main$validate_transferid(model),
+						A2(
+						_elm_lang$html$Html$br,
+						_elm_lang$core$Native_List.fromArray(
+							[]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						A2(
+						_elm_lang$html$Html$label,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$for('approve_field')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('Approve? ')
+							])),
+						A2(
+						_elm_lang$html$Html$input,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$id('approve_field'),
+								_elm_lang$html$Html_Attributes$type$('checkbox'),
+								_elm_lang$html$Html_Events$onClick(
+								_user$project$Main$SetApprove('True'))
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						A2(
+						_elm_lang$html$Html$br,
+						_elm_lang$core$Native_List.fromArray(
+							[]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						A2(
+						_elm_lang$html$Html$button,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Events$onClick(
+								_user$project$Main$valid_inputs(model) ? _user$project$Main$SubmitForm : _user$project$Main$SetInputState)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('Handle Incoming Transfer')
+							]))
+					])),
+				A2(
+				_elm_lang$html$Html$h3,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text(model.message)
+					]))
+			]));
+};
+var _user$project$Main$main = {
+	main: _elm_lang$html$Html_App$program(
+		{init: _user$project$Main$init, view: _user$project$Main$view, update: _user$project$Main$update, subscriptions: _user$project$Main$subscriptions})
+};

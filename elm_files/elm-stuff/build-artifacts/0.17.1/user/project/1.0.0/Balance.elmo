@@ -1,0 +1,266 @@
+var _user$project$Balance$valid_inputs = function (model) {
+	return _elm_lang$core$Basics$not(
+		_elm_lang$core$Native_Utils.eq(model.password, '') || _elm_lang$core$Native_Utils.eq(model.userid, ''));
+};
+var _user$project$Balance$validate_userid = function (model) {
+	var userid_state = _elm_lang$core$Native_Utils.eq(model.userid, '') ? 'UserID Required' : '';
+	return _elm_lang$html$Html$text(userid_state);
+};
+var _user$project$Balance$validate_password = function (model) {
+	var password_state = _elm_lang$core$Native_Utils.eq(model.password, '') ? 'Password Required' : '';
+	return _elm_lang$html$Html$text(password_state);
+};
+var _user$project$Balance$subscriptions = function (model) {
+	return _elm_lang$core$Platform_Sub$none;
+};
+var _user$project$Balance$balanceDecoder = A3(
+	_elm_lang$core$Json_Decode$object2,
+	F2(
+		function (v0, v1) {
+			return {ctor: '_Tuple2', _0: v0, _1: v1};
+		}),
+	A2(_elm_lang$core$Json_Decode_ops[':='], 'Balance', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode_ops[':='], 'Error', _elm_lang$core$Json_Decode$string));
+var _user$project$Balance$userEncoder = function (model) {
+	return _elm_lang$core$Json_Encode$object(
+		_elm_lang$core$Native_List.fromArray(
+			[
+				{
+				ctor: '_Tuple2',
+				_0: 'userid',
+				_1: _elm_lang$core$Json_Encode$string(model.userid)
+			},
+				{
+				ctor: '_Tuple2',
+				_0: 'password',
+				_1: _elm_lang$core$Json_Encode$string(model.password)
+			}
+			]));
+};
+var _user$project$Balance$checkBalance = F2(
+	function (model, api_url) {
+		return A2(
+			_evancz$elm_http$Http$fromJson,
+			_user$project$Balance$balanceDecoder,
+			A2(
+				_evancz$elm_http$Http$send,
+				_evancz$elm_http$Http$defaultSettings,
+				{
+					verb: 'POST',
+					headers: _elm_lang$core$Native_List.fromArray(
+						[
+							{ctor: '_Tuple2', _0: 'Content-Type', _1: 'application/json'}
+						]),
+					url: api_url,
+					body: _evancz$elm_http$Http$string(
+						A2(
+							_elm_lang$core$Json_Encode$encode,
+							0,
+							_user$project$Balance$userEncoder(model)))
+				}));
+	});
+var _user$project$Balance$balance_url = 'http://localhost:5000/balance';
+var _user$project$Balance$Model = F3(
+	function (a, b, c) {
+		return {userid: a, password: b, message: c};
+	});
+var _user$project$Balance$init = {
+	ctor: '_Tuple2',
+	_0: A3(_user$project$Balance$Model, '', '', ''),
+	_1: _elm_lang$core$Platform_Cmd$none
+};
+var _user$project$Balance$SetInputState = {ctor: 'SetInputState'};
+var _user$project$Balance$SubmitSuccess = function (a) {
+	return {ctor: 'SubmitSuccess', _0: a};
+};
+var _user$project$Balance$SubmitFail = function (a) {
+	return {ctor: 'SubmitFail', _0: a};
+};
+var _user$project$Balance$submitCmd = F2(
+	function (model, api_url) {
+		return A3(
+			_elm_lang$core$Task$perform,
+			_user$project$Balance$SubmitFail,
+			_user$project$Balance$SubmitSuccess,
+			A2(_user$project$Balance$checkBalance, model, api_url));
+	});
+var _user$project$Balance$update = F2(
+	function (msg, model) {
+		var _p0 = msg;
+		switch (_p0.ctor) {
+			case 'SetUserId':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{userid: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SetPassword':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{password: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SubmitForm':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A2(_user$project$Balance$submitCmd, model, _user$project$Balance$balance_url)
+				};
+			case 'SubmitFail':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							password: '',
+							message: _elm_lang$core$Basics$toString(_p0._0)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'SubmitSuccess':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							password: '',
+							message: A2(_elm_lang$core$Basics_ops['++'], _p0._0._0, _p0._0._1)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{password: '', message: 'Check Required Fields'}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+		}
+	});
+var _user$project$Balance$SubmitForm = {ctor: 'SubmitForm'};
+var _user$project$Balance$SetPassword = function (a) {
+	return {ctor: 'SetPassword', _0: a};
+};
+var _user$project$Balance$SetUserId = function (a) {
+	return {ctor: 'SetUserId', _0: a};
+};
+var _user$project$Balance$view = function (model) {
+	return A2(
+		_elm_lang$html$Html$div,
+		_elm_lang$core$Native_List.fromArray(
+			[]),
+		_elm_lang$core$Native_List.fromArray(
+			[
+				A2(
+				_elm_lang$html$Html$h2,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('Gooble Gobble')
+					])),
+				_user$project$Navigation$navigation_bar,
+				A2(
+				_elm_lang$html$Html$h3,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text('Check Balance')
+					])),
+				A2(
+				_elm_lang$html$Html$div,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						A2(
+						_elm_lang$html$Html$label,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$for('userid_field')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('User Id ')
+							])),
+						A2(
+						_elm_lang$html$Html$input,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$id('userid_field'),
+								_elm_lang$html$Html_Attributes$type$('string'),
+								_elm_lang$html$Html_Attributes$placeholder('Enter UserID'),
+								_elm_lang$html$Html_Attributes$required(true),
+								_elm_lang$html$Html_Events$onInput(_user$project$Balance$SetUserId)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						_user$project$Balance$validate_userid(model),
+						A2(
+						_elm_lang$html$Html$br,
+						_elm_lang$core$Native_List.fromArray(
+							[]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						A2(
+						_elm_lang$html$Html$label,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$for('password_field')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('Password ')
+							])),
+						A2(
+						_elm_lang$html$Html$input,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$id('password_field'),
+								_elm_lang$html$Html_Attributes$type$('password'),
+								_elm_lang$html$Html_Attributes$placeholder('Enter Password'),
+								_elm_lang$html$Html_Attributes$required(true),
+								_elm_lang$html$Html_Attributes$value(model.password),
+								_elm_lang$html$Html_Events$onInput(_user$project$Balance$SetPassword)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						_user$project$Balance$validate_password(model),
+						A2(
+						_elm_lang$html$Html$br,
+						_elm_lang$core$Native_List.fromArray(
+							[]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						A2(
+						_elm_lang$html$Html$button,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Events$onClick(
+								_user$project$Balance$valid_inputs(model) ? _user$project$Balance$SubmitForm : _user$project$Balance$SetInputState)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text('Check Balance')
+							]))
+					])),
+				A2(
+				_elm_lang$html$Html$h3,
+				_elm_lang$core$Native_List.fromArray(
+					[]),
+				_elm_lang$core$Native_List.fromArray(
+					[
+						_elm_lang$html$Html$text(model.message)
+					]))
+			]));
+};
+var _user$project$Balance$main = {
+	main: _elm_lang$html$Html_App$program(
+		{init: _user$project$Balance$init, view: _user$project$Balance$view, update: _user$project$Balance$update, subscriptions: _user$project$Balance$subscriptions})
+};

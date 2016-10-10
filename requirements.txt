@@ -1,3 +1,6 @@
 FLASK==0.10.1
 Flask-SQLAlchemy==1.0
 Flask-WTF==0.9.3
+requests
+uuid
+validators

@@ -1,0 +1,43 @@
+-------------------------
+--    APP DIRECTORY    --
+-------------------------
+
+__init__.py:
+	- declares and configures app
+	- declares and configures db
+
+views.py:
+	- contains routes and their definitions
+	- 5 available routes:
+		- /register
+		- /balance
+		- /transfers
+		- /create_transfer
+		- /handle_incoming_request
+
+models.py:
+	- contains all database table models
+
+generators.py:
+	- contains api's that generate userid's and transferid's
+
+custom_validators.py:
+	- contains all validators of input data
+
+verifiers.py:
+	- contains all verifiers for request objects from database
+		- verify if a user exists
+		- verify if a transfer exists
+
+templates/:
+	- contains html jinja templates
+		- currently, these are not rendered anywhere
+	- contains html templates generated from elm files
+		- rendered by all routes
+
+static/:
+	- empty; no javascript or css files so far
+
+forms/:
+	- contains form definitions for jinja templates
+

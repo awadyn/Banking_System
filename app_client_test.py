@@ -24,7 +24,6 @@ class FlaskTestCase(unittest.TestCase):
 	def setUp(self):
 		app.config['TESTING'] = True
 		app.config['WTF_CSRF_ENABLED'] = False
-#		app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'test_client.db')
 		db.create_all()
 		user_1 = models.User(userid=self.uid_1, password='1111111111', balance=0)
 		user_2 = models.User(userid=self.uid_2, password='2222222222', balance=0)

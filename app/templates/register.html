@@ -16,13 +16,6 @@
 			{% endfor %}<br>
 
 		</p>
-		<p> Balance:<br>
-			{{ form.balance }}<br>
-			{% for error in form.balance.errors %}
-				<span style="color: red;">[{{ error }}]</span>
-			{% endfor %}<br>
-
-		</p>
 		<p><input type="submit" value="Register"></p>
 	</form>
 {% endblock %}

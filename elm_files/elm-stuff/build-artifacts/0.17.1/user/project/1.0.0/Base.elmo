@@ -1,0 +1,98 @@
+var _user$project$Base$base_url = 'http://localhost:5000/';
+var _user$project$Base$navigation_bar = A2(
+	_elm_lang$html$Html$nav,
+	_elm_lang$core$Native_List.fromArray(
+		[]),
+	_elm_lang$core$Native_List.fromArray(
+		[
+			_elm_lang$html$Html$text(' | '),
+			A2(
+			_elm_lang$html$Html$a,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$href(
+					A2(_elm_lang$core$Basics_ops['++'], _user$project$Base$base_url, 'register')),
+					_elm_lang$html$Html_Attributes$style(
+					_elm_lang$core$Native_List.fromArray(
+						[
+							{ctor: '_Tuple2', _0: 'text-decoration', _1: 'none'}
+						]))
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html$text('Register')
+				])),
+			_elm_lang$html$Html$text(' | '),
+			A2(
+			_elm_lang$html$Html$a,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$href(
+					A2(_elm_lang$core$Basics_ops['++'], _user$project$Base$base_url, 'balance')),
+					_elm_lang$html$Html_Attributes$style(
+					_elm_lang$core$Native_List.fromArray(
+						[
+							{ctor: '_Tuple2', _0: 'text-decoration', _1: 'none'}
+						]))
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html$text('Balance')
+				])),
+			_elm_lang$html$Html$text(' | '),
+			A2(
+			_elm_lang$html$Html$a,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$href(
+					A2(_elm_lang$core$Basics_ops['++'], _user$project$Base$base_url, 'transfers')),
+					_elm_lang$html$Html_Attributes$style(
+					_elm_lang$core$Native_List.fromArray(
+						[
+							{ctor: '_Tuple2', _0: 'text-decoration', _1: 'none'}
+						]))
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html$text('Transfers')
+				])),
+			_elm_lang$html$Html$text(' | '),
+			A2(
+			_elm_lang$html$Html$a,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$href(
+					A2(_elm_lang$core$Basics_ops['++'], _user$project$Base$base_url, 'create_transfer')),
+					_elm_lang$html$Html_Attributes$style(
+					_elm_lang$core$Native_List.fromArray(
+						[
+							{ctor: '_Tuple2', _0: 'text-decoration', _1: 'none'}
+						]))
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html$text('Create Transfer')
+				])),
+			_elm_lang$html$Html$text(' | '),
+			A2(
+			_elm_lang$html$Html$a,
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html_Attributes$href(
+					A2(_elm_lang$core$Basics_ops['++'], _user$project$Base$base_url, 'handle_incoming_request')),
+					_elm_lang$html$Html_Attributes$style(
+					_elm_lang$core$Native_List.fromArray(
+						[
+							{ctor: '_Tuple2', _0: 'text-decoration', _1: 'none'}
+						]))
+				]),
+			_elm_lang$core$Native_List.fromArray(
+				[
+					_elm_lang$html$Html$text('Handle Incoming Transfer')
+				])),
+			_elm_lang$html$Html$text(' | ')
+		]));
+var _user$project$Base$None = {ctor: 'None'};
+var _user$project$Base$Some = function (a) {
+	return {ctor: 'Some', _0: a};
+};

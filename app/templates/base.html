@@ -9,6 +9,13 @@
 	<body>
 		<div>Gooble Gobble One of Us</div>
 		<hr>
+		<li><a href="http://127.0.0.1:5000/register">Register</a></li>
+		<li><a href="http://127.0.0.1:5000/balance">Check Balance</a></li>
+		<li><a href="http://127.0.0.1:5000/transfers">Incoming Transfers</a></li>
+		<li><a href="http://127.0.0.1:5000/create_transfer">Create Transfer Request</a></li>
+		<li><a href="http://127.0.0.1:5000/handle_incoming_request">Handle Incoming Transfer Request</a></li>
+		</ul>
+		<hr>
 		{% with messages = get_flashed_messages() %}
 			{% if messages %}
 				<ul>
