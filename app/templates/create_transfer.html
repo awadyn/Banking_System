@@ -27,6 +27,12 @@
 				<span style="color: red;">[{{ error }}]</span>
 			{% endfor %}<br>
 		</p>
+		<p> Transfer Message:<br>
+			{{ form.message(size=30) }}<br>
+			{% for error in form.message.errors %}
+				<span style="color: red;">[{{ error }}]</span>
+			{% endfor %}<br>
+		</p>
 		<p><input type="submit" value="Create Transfer"></p>
 	</form>
 {% endblock %}

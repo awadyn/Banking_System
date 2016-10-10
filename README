@@ -2,32 +2,62 @@
 -	Simple Banking Application	-
 -----------------------------------------
 
---------> run tests: python app_test.py
-	
---------> available procedures:
-	- show users in system
-	- show transfers to user
+-- REQUIREMENTS --
+
+--> pip install -r requirements.txt
+
+
+
+
+--> available procedures:
 	- register user in system
 	- check user balance
+	- show transfers made to user
 	- create transfer request
 	- handle incoming transfer request
 
 
------------------------------------------
-Create Database
------------------------------------------
-python db_create.py
 
 
------------------------------------------
-Database Schema Versioning
------------------------------------------
----> check if database schema has changed:
-python db_migrate.py
+-- TESTING --
 
----> upgrade if changed:
-python db_upgrade.py
+--> run tests:
+	- python app_client_test.py
+	- runs 5 tests (one for each route)
+	- each test POST request returns a json type response showing:
+		- request verification errors
+		- request response data if no errors
 
----> downgrade if changed:
-python db_downgrade.py
+
+
+
+-- APPLICATION SETUP --
+
+--> setup database:
+	- python db_setup.py
+	- creates database tables with some dummy data:
+		- 2 registered users and 3 created transfers between them
+
+--> teardown database:
+	- python db_teardown.py
+
+--> keeping track of the database:
+	- initialize alembic:
+		- alembic init alembic
+	- generate new revision:
+		- alembic revision -m <revision message>
+	- check database revision status:
+		- alembic current
+	- see all revisions:
+		- cd alembic/versions
+		- ls: shows all made revisions as <revision_hash>_<revision_message>
+	- upgrade/downgrade database:
+		- alembic upgrade <revision>
+		- alembic downgrade <revision>
+
+--> start listener:
+	- python run.py
+
+--> test API through UIs:
+	- navigate to "http://localhost:5000/<route name>"
 
